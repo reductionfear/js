@@ -2,7 +2,6 @@
 
 window.STOCKFISH = (function () {
     return function () {
-        var ChessEngine = window['js-chess-engine'];
         var game = null;
         var currentFen = null;
         var depth = 10;
@@ -30,7 +29,7 @@ window.STOCKFISH = (function () {
                         currentFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
                         var movesIndex = parts.indexOf('moves');
                         if (movesIndex !== -1) {
-                            game = new ChessEngine.Game(currentFen);
+                            game = new window['js-chess-engine'].Game(currentFen);
                             for (var i = movesIndex + 1; i < parts.length; i++) {
                                 var move = parts[i];
                                 var from = move.substring(0, 2).toUpperCase();
@@ -43,7 +42,7 @@ window.STOCKFISH = (function () {
                             }
                             currentFen = game.exportFEN();
                         } else {
-                            game = new ChessEngine.Game(currentFen);
+                            game = new window['js-chess-engine'].Game(currentFen);
                         }
                     } else if (parts[1] === 'fen') {
                         var fenParts = [];
@@ -53,7 +52,7 @@ window.STOCKFISH = (function () {
                             i++;
                         }
                         currentFen = fenParts.join(' ');
-                        game = new ChessEngine.Game(currentFen);
+                        game = new window['js-chess-engine'].Game(currentFen);
                         
                         if (parts[i] === 'moves') {
                             for (var j = i + 1; j < parts.length; j++) {
@@ -78,7 +77,7 @@ window.STOCKFISH = (function () {
                     
                     setTimeout(function() {
                         if (!game) {
-                            game = new ChessEngine.Game(currentFen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+                            game = new window['js-chess-engine'].Game(currentFen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
                         }
                         
                         try {
