@@ -53,6 +53,16 @@ window.STOCKFISH = (function () {
                             i++;
                         }
                         currentFen = fenParts.join(' ');
+                        // Ensure FEN has all required fields
+                        var fenFields = currentFen.split(' ');
+                        while (fenFields.length < 6) {
+                            if (fenFields.length === 1) fenFields.push('w'); // turn
+                            else if (fenFields.length === 2) fenFields.push('KQkq'); // castling
+                            else if (fenFields.length === 3) fenFields.push('-'); // en passant
+                            else if (fenFields.length === 4) fenFields.push('0'); // halfmove
+                            else if (fenFields.length === 5) fenFields.push('1'); // fullmove
+                        }
+                        currentFen = fenFields.join(' ');
                         game = new ChessEngine.Game(currentFen);
                         
                         if (parts[i] === 'moves') {
