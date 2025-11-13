@@ -1,0 +1,112 @@
+// ==UserScript==
+// @name         Lichess Bot v5
+// @description  Fully automated lichess bot
+// @author       Nuro
+// @match         *://lichess.org/*
+// @run-at        document-start
+// @grant         none
+// @require       https://raw.githubusercontent.com/workinworld/stkfish/refs/heads/main/stockfish8.js
+// ==/UserScript==
+
+let chessEngine;
+let currentFen = "";
+let bestMove;
+let webSocketWrapper = null;
+
+function initializeChessEngine() {
+    chessEngine = window.STOCKFISH();
+}
+
+//
+// ... your other functions (initializeChessEngine, etc.) are fine ...
+//
+
+function interceptWebSocket() {
+    let webSocket = window.WebSocket;
+    const webSocketProxy = new Proxy(webSocket, {
+        construct: function (target, args) {
+            let wrappedWebSocket = new target(...args);
+            webSocketWrapper = wrappedWebSocket;
+
+            // ---- MODIFICATION START ----
+            wrappedWebSocket.addEventListener("message", function (event) {
+                let message;
+                try {
+                    message = JSON.parse(event.data);
+                } catch (e) {
+                    return; // Ignore non-JSON messages
+                }
+
+                // Use the message type 't' to decide what to do
+                switch (message.t) {
+                    // This is a "fall-through" case.
+                    // It will execute the same code for both 'd' and 'move' types.
+                    case 'd':
+                    case 'move':
+                        console.log("Received game state/move update:", message.t, message);
+
+                        // The important check: Does this message contain the board state?
+                        if (message.d && typeof message.d.fen === "string") {
+                            currentFen = message.d.fen;
+
+                            // 'v' is a counter that helps determine whose turn it is.
+                            // If v is odd, it's Black's turn to move. If even, it's White's.
+                            // The FEN is for the position BEFORE the move in the message,
+                            // so we need to know whose turn it is now.
+                            let isWhitesTurn = message.d.ply % 2 === 0;
+
+                            if (isWhitesTurn) {
+                                currentFen += " w";
+                            } else {
+                                currentFen += " b";
+                            }
+
+                            // We have the FEN, now calculate the move
+                            calculateMove();
+                        }
+                        break;
+
+                    case 'clockInc':
+                        console.log("Clock increment received. Ignoring.", message.d);
+                        break;
+
+                    case 'crowd':
+                    case 'mlat':
+                        // Also ignore crowd (spectator) and latency updates
+                        break;
+
+                    default:
+                        // Log any other message types for debugging
+                        console.log("Received unhandled message type:", message.t, message);
+                }
+            });
+            // ---- MODIFICATION END ----
+
+            return wrappedWebSocket;
+        }
+    });
+
+    window.WebSocket = webSocketProxy;
+}
+
+
+function calculateMove() {
+    chessEngine.postMessage("position fen " + currentFen);
+    chessEngine.postMessage("go depth 8");
+}
+
+function setupChessEngineOnMessage() {
+    chessEngine.onmessage = function (event) {
+        if (event && event.includes("bestmove")) {
+            bestMove = event.split(" ")[1];
+            webSocketWrapper.send(JSON.stringify({
+                t: "move",
+                d: { u: bestMove, b: 1, l: 1000, a: 1 }
+            }));
+        }
+    };
+}
+
+initializeChessEngine();
+interceptWebSocket();
+setupChessEngineOnMessage();
