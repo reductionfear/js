@@ -1,0 +1,22 @@
+{
+  "name": "lichess-external-bot",
+  "version": "1.0.0",
+  "description": "External Lichess bot using prebuilt exe engines and Chrome debugging",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "launch": "node launcher.js"
+  },
+  "keywords": [
+    "lichess",
+    "chess",
+    "bot",
+    "stockfish"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chrome-remote-interface": "^0.33.2"
+  }
+}
