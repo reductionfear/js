@@ -1,6 +1,6 @@
 use electron so its all external
 no browser extension needed chrome in debug mode then inject code
-can use compiled executable engines not only js
+can use compiled executable engines example blunder.exe not only js
 
 async launchChrome() {
 const chromePath = this.getChromePath();
