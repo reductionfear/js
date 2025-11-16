@@ -2,6 +2,8 @@ Lichess Bot (stockfish8) 2.js  is working for lichess.org
 use electron so its all external
 no browser extension needed chrome in debug mode then inject code
 can use compiled executable engines example blunder.exe not only js
+features may be multiple arrows different colors for best 4 moves with say least cp losing moves
+automove just like Lichess Bot (stockfish8) 2.js
 
 examples-
 
